@@ -1,8 +1,9 @@
 import numpy as np
 from qiskit import QuantumCircuit
-from exact_one_gate import exact_one
+from exact_one_x_cx_ccx import exact_one_gate
 
-#Implementation of the Fan_out_1 gate based on Algo 1 from paper https://arxiv.org/pdf/2501.16802
+# Implementation of the Fan_out_1 gate is based on Algorithm 1 from paper : Ancilla-free Quantum Adder with Sublinear Depth (https://arxiv.org/pdf/2501.16802)
+# Authors : Maxime Remaud and Vivien Vandaele
 
 def L1(n):
     qc =  QuantumCircuit(n)
@@ -54,7 +55,7 @@ def build_circuit_from_A(n):
     """Qubit order: [q0, q1, ..., q_{n-1}, anc, flag]"""
     qc = QuantumCircuit(n + 2, name=f"PREPARE_{n}")
     qc.append(A_n(n), list(range(n)))
-    qc.append(exact_one(n), qc.qubits)
+    qc.append(exact_one_gate(n), qc.qubits)
     return qc
 
 # PREPARE – SELECT – PREPARE†
@@ -62,7 +63,6 @@ def build_prepare_select_prepare_dag(n):
     """
     Qubit layout (Qiskit bitstring, q0 on the right):
     [anc_(n-1) ... anc_0 | b_(n-1) ... b_0 | flag | q_(n-1) ... q_0 ]
-    Total qubits = 3n + 1
     """
     qc = QuantumCircuit(3*n + 1, name="PREPARE_SELECT_PREPAREdag")
 

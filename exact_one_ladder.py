@@ -24,8 +24,7 @@ def exact_one_ladder_power_2(n):
         qc.ccx(0,1,2)
         qc.x(0)
         qc.ccx(0,1,3)
-        gate = qc.to_gate()
-        return gate
+        return qc
     else:
         qc1 = exact_one_ladder_power_2(n//2)
         reg1 = [k for k in range(0,n//2)] + [k for k in range(n,n +2*(n//2)-2)]
@@ -41,8 +40,7 @@ def exact_one_ladder_power_2(n):
         qc.ccx(reg1[-2],reg2[-2],3*n-3)
         qc.x(reg1[-1])
         qc.x(reg2[-1])
-        gate = qc.to_gate()
-        return gate
+        return qc
     
     
 def exact_one_ladder(n, trace_depth_and_size=False):
@@ -78,6 +76,7 @@ def exact_one_ladder(n, trace_depth_and_size=False):
         qc.x(reg2[-1])
         exact_one_ladder_memory[n] = qc
         if trace_depth_and_size:
+            qc = transpile(qc, basis_gates=['x','cx','ccx'])
             exact_one_ladder_depth[n] = qc.depth()
             exact_one_ladder_size[n] = qc.size()
         return qc

@@ -5,7 +5,7 @@ import numpy as np
 import pytest
 from qiskit import QuantumCircuit
 from qiskit.compiler import transpile
-from exact_one_gate import exact_one
+from exact_one_x_cx_ccx import exact_one_gate
 
 def bulk_simulate_result_of_applying_classical_circuit_to(circuit, input_states: np.ndarray) -> np.ndarray:
     states = np.copy(input_states)
@@ -55,7 +55,7 @@ def compute_depth(circuit) -> int:
 @pytest.mark.parametrize('bit_string_size', [10, 100, 200, 500, 1000])
 def test_depth(bit_string_size: int):
     num_qubits = bit_string_size + 2
-    gate = exact_one(bit_string_size)
+    gate = exact_one_gate(bit_string_size)
     circuit = QuantumCircuit(num_qubits)
     circuit.append(gate, list(range(num_qubits)))
     circuit = transpile(circuit, basis_gates=['x', 'cx', 'ccx'])
@@ -69,7 +69,7 @@ def test_fuzz_random_cases(bit_string_size: int):
     num_samples = 1024
     num_qubits = bit_string_size + 2
     target_index = bit_string_size + 1
-    gate = exact_one(bit_string_size)
+    gate = exact_one_gate(bit_string_size)
     circuit = QuantumCircuit(num_qubits)
     circuit.append(gate, list(range(num_qubits)))
     circuit = transpile(circuit, basis_gates=['x', 'cx', 'ccx'])
@@ -101,7 +101,7 @@ def test_exact_ones_cases(bit_string_size: int, num_ones_qubits: int):
     num_qubits = bit_string_size + 2
     target_index = bit_string_size + 1
     ancilla_index = bit_string_size
-    gate = exact_one(bit_string_size)
+    gate = exact_one_gate(bit_string_size)
     circuit = QuantumCircuit(num_qubits)
     circuit.append(gate, list(range(num_qubits)))
     circuit = transpile(circuit, basis_gates=['x', 'cx', 'ccx'])

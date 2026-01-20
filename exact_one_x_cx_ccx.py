@@ -65,8 +65,8 @@ exact_one_memory[n] = qc.to_gate()
 exact_one_depth[n] = qc.depth()
 exact_one_size[n] = qc.size()
 
-def exact_one(n, trace_depth_and_size=False):
-    if n in exact_one_memory:
+def exact_one_gate(n, trace_depth_and_size=False):
+    if n in exact_one_memory and not(trace_depth_and_size and n not in exact_one_depth.keys()):
         return exact_one_memory[n]
 
     k = n//4
@@ -116,6 +116,7 @@ def exact_one(n, trace_depth_and_size=False):
     gate = qc.to_gate()
     exact_one_memory[n] = gate
     if trace_depth_and_size:
+        qc = transpile(qc, basis_gates=['x','cx','ccx'])
         exact_one_depth[n] = qc.depth()
         exact_one_size[n] = qc.size()
 
@@ -133,10 +134,10 @@ def access_exact_one_size(nc):
     else:
         print('Such gate has not been compiled yet.')
 
-def classical_gates_circuit(n):
+def exact_one_circuit(n):
     nqubits = n+2
-    hamming_weight_gate = exact_one(n, trace_depth_and_size=True)
+    exact_one = exact_one_gate(n, trace_depth_and_size=True)
     log_qc = QuantumCircuit(nqubits)
-    log_qc.append(hamming_weight_gate, list(range(nqubits)))
+    log_qc.append(exact_one, list(range(nqubits)))
     log_qc = transpile(log_qc, basis_gates=['x', 'cx', 'ccx'])
     return log_qc

@@ -1,5 +1,5 @@
 """
-The following code implementing multi-control-X gates (MCX) with logarithmic depth is based on the paper : 
+The following code implementing multi-control-X gates (MCX) with logarithmic depth is based on paper : 
 Rise of conditionally clean ancillae for efficient quantum circuit constructions (https://quantum-journal.org/papers/q-2025-05-21-1752/pdf/)
 Authors : Tanuj Khattar and Craig Gidney
 """
@@ -86,9 +86,9 @@ def get_linear_depth_ladder_ops(ncontrol):
 
 
 def mcx_linear_gate(ncontrol, clean=False, trace_depth_and_size=False):
-    """Multi-control-single-target $C^{n}X$ using $2n-3$ Toffoli, 1 dirty ancilla (or clean when clean=True) and depth n. Register is of form [controls...,ancilla, target]"""
+    """Multi-control-single-target $C^{n}X$ using 1 dirty ancilla (or clean when clean=True) and depth n. Register is of form [controls...,ancilla, target]"""
 
-    if ncontrol in linear_mcx_memory:
+    if ncontrol in linear_mcx_memory and not(trace_depth_and_size and ncontrol not in linear_mcx_depth.keys()):
         return linear_mcx_memory[ncontrol]
 
     nqubits = ncontrol + 2
@@ -120,7 +120,7 @@ def mcx_linear_gate(ncontrol, clean=False, trace_depth_and_size=False):
         if t == 0:
             qc.ccx(x, y, t)
         else:
-            if idx <= (len(ladder_ops)//2) -1 :
+            if idx <= (len(ladder_ops)//2) -1 : # Trick to reduce depth manually (qiskit does not optimize well here)
                 # Toffoli + X
                 qc.ccx(x, y, t)
                 qc.x(t)
@@ -157,11 +157,11 @@ def mcx_linear_gate(ncontrol, clean=False, trace_depth_and_size=False):
     qc_reordered.compose(qc, qubits = [anc] + controls + [target], inplace=True)
     gate = qc_reordered.to_gate()
 
-    if clean : #Storing gates only if ancilla is dirty (what we use in final mcx decomposition)
+    if not clean : #Storing gates only if ancilla is dirty (what we use in final mcx decomposition)
         linear_mcx_memory[ncontrol] = gate
         if trace_depth_and_size:
-            linear_mcx_depth[ncontrol] = qc.depth()
-            linear_mcx_size[ncontrol] = qc.size()
+            linear_mcx_depth[ncontrol] = qc_reordered.depth()
+            linear_mcx_size[ncontrol] = qc_reordered.size()
 
     return gate
 
@@ -206,9 +206,9 @@ def get_log_depth_ladder_ops(ncontrol):
 
 
 def mcx_log_gate(ncontrol, clean=False, trace_depth_and_size=False):
-    """Multi-control-single-target $C^{n}X$ using $4n-8$ Toffoli, 2 dirty ancillae (or clean when clean=True) and depth log(n). Register is of form [controls..., ancilla1, ancilla2, target]"""
+    """Multi-control-single-target $C^{n}X$ using 2 dirty ancillae (or clean when clean=True) and depth log(n). Register is of form [controls..., ancilla1, ancilla2, target]"""
 
-    if ncontrol in log_mcx_memory:
+    if ncontrol in log_mcx_memory and not(trace_depth_and_size and ncontrol not in log_mcx_depth.keys()):
         return log_mcx_memory[ncontrol]
 
     nqubits = ncontrol + 3
@@ -262,24 +262,25 @@ def mcx_log_gate(ncontrol, clean=False, trace_depth_and_size=False):
     if not clean : #Storing gates only if ancilla is dirty
         log_mcx_memory[ncontrol] = gate
         if trace_depth_and_size:
-            log_mcx_depth[ncontrol] = qc.depth()
-            log_mcx_size[ncontrol] = qc.size()
+            qc_reordered = transpile(qc_reordered, basis_gates=['x','cx','ccx'])
+            log_mcx_depth[ncontrol] = qc_reordered.depth()
+            log_mcx_size[ncontrol] = qc_reordered.size()
 
     return gate
 
-def access_log_mcx_depth(nc):
+def access_mcx_log_depth(nc):
     if nc in log_mcx_depth.keys():
         return log_mcx_depth[nc]
     else:
         print('Such gate has not been compiled yet.')
 
-def access_log_mcx_size(nc):
+def access_mcx_size(nc):
     if nc in log_mcx_size.keys():
         return log_mcx_size[nc]
     else:
         print('Such gate has not been compiled yet.')
 
-def classical_gates_circuit(ncontrol):
+def mcx_log_circuit(ncontrol):
     nqubits = ncontrol+3
     log_gate = mcx_log_gate(ncontrol, trace_depth_and_size=True)
     log_qc = QuantumCircuit(nqubits)
