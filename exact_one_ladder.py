@@ -44,7 +44,7 @@ def exact_one_ladder_power_2(n):
     
     
 def exact_one_ladder(n, trace_depth_and_size=False):
-    if n in exact_one_ladder_memory:
+    if n in exact_one_ladder_memory.keys() and not(trace_depth_and_size and n not in exact_one_ladder_depth.keys()):
         return exact_one_ladder_memory[n]
     k = int(np.floor(np.log2(n)))
     if n == 2**k:

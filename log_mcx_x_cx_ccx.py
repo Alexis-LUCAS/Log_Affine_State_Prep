@@ -88,7 +88,7 @@ def get_linear_depth_ladder_ops(ncontrol):
 def mcx_linear_gate(ncontrol, clean=False, trace_depth_and_size=False):
     """Multi-control-single-target $C^{n}X$ using 1 dirty ancilla (or clean when clean=True) and depth n. Register is of form [controls...,ancilla, target]"""
 
-    if ncontrol in linear_mcx_memory and not(trace_depth_and_size and ncontrol not in linear_mcx_depth.keys()):
+    if ncontrol in linear_mcx_memory.keys() and not(trace_depth_and_size and ncontrol not in linear_mcx_depth.keys()):
         return linear_mcx_memory[ncontrol]
 
     nqubits = ncontrol + 2
@@ -208,7 +208,7 @@ def get_log_depth_ladder_ops(ncontrol):
 def mcx_log_gate(ncontrol, clean=False, trace_depth_and_size=False):
     """Multi-control-single-target $C^{n}X$ using 2 dirty ancillae (or clean when clean=True) and depth log(n). Register is of form [controls..., ancilla1, ancilla2, target]"""
 
-    if ncontrol in log_mcx_memory and not(trace_depth_and_size and ncontrol not in log_mcx_depth.keys()):
+    if ncontrol in log_mcx_memory.keys() and not(trace_depth_and_size and ncontrol not in log_mcx_depth.keys()):
         return log_mcx_memory[ncontrol]
 
     nqubits = ncontrol + 3

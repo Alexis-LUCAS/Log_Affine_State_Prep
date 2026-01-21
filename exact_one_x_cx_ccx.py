@@ -66,7 +66,7 @@ exact_one_depth[n] = qc.depth()
 exact_one_size[n] = qc.size()
 
 def exact_one_gate(n, trace_depth_and_size=False):
-    if n in exact_one_memory and not(trace_depth_and_size and n not in exact_one_depth.keys()):
+    if n in exact_one_memory.keys() and not(trace_depth_and_size and n not in exact_one_depth.keys()):
         return exact_one_memory[n]
 
     k = n//4
