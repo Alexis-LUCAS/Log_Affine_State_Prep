@@ -86,9 +86,9 @@ def get_linear_depth_ladder_ops(ncontrol):
 
 
 def mcx_linear_gate(ncontrol, clean=False, trace_depth_and_size=False):
-    """Multi-control-single-target $C^{n}X$ using 1 dirty ancilla (or clean when clean=True) and depth n. Register is of form [controls...,ancilla, target]"""
+    """Multi-control-single-target $C^{n}X$ using 1 ancilla (dirty by default) and depth n. Register is of form [controls...,ancilla, target]"""
 
-    if ncontrol in linear_mcx_memory.keys() and not(trace_depth_and_size and ncontrol not in linear_mcx_depth.keys()):
+    if ncontrol in linear_mcx_memory.keys() and not(trace_depth_and_size and ncontrol not in linear_mcx_depth.keys()) and (not clean or ncontrol <=2):
         return linear_mcx_memory[ncontrol]
 
     nqubits = ncontrol + 2
@@ -157,7 +157,7 @@ def mcx_linear_gate(ncontrol, clean=False, trace_depth_and_size=False):
     qc_reordered.compose(qc, qubits = [anc] + controls + [target], inplace=True)
     gate = qc_reordered.to_gate()
 
-    if not clean : #Storing gates only if ancilla is dirty (what we use in final mcx decomposition)
+    if not clean : #Storing gates only if ancilla is dirty (what we use for exact_one)
         linear_mcx_memory[ncontrol] = gate
         if trace_depth_and_size:
             linear_mcx_depth[ncontrol] = qc_reordered.depth()
@@ -205,10 +205,10 @@ def get_log_depth_ladder_ops(ncontrol):
     return ladder_ops, sorted(final_ctrls)
 
 
-def mcx_log_gate(ncontrol, clean=False, trace_depth_and_size=False):
-    """Multi-control-single-target $C^{n}X$ using 2 dirty ancillae (or clean when clean=True) and depth log(n). Register is of form [controls..., ancilla1, ancilla2, target]"""
+def mcx_log_gate(ncontrol, clean1=True, clean2 =False, trace_depth_and_size=False):
+    """Multi-control-single-target $C^{n}X$ using 2 ancillae (first clean and second dirty by default) and depth log(n). Register is of form [controls..., ancilla1, ancilla2, target]"""
 
-    if ncontrol in log_mcx_memory.keys() and not(trace_depth_and_size and ncontrol not in log_mcx_depth.keys()):
+    if ncontrol in log_mcx_memory.keys() and not(trace_depth_and_size and ncontrol not in log_mcx_depth.keys()) and ((clean1 and not clean2) or ncontrol <=2):
         return log_mcx_memory[ncontrol]
 
     nqubits = ncontrol + 3
@@ -230,7 +230,7 @@ def mcx_log_gate(ncontrol, clean=False, trace_depth_and_size=False):
             qc.x(t)
 
     #Central linear MCX
-    linear_mcx = mcx_linear_gate(len(final_ctrls))
+    linear_mcx = mcx_linear_gate(len(final_ctrls), clean=clean2)
     qc.append(linear_mcx, final_ctrls + [anc2, target])
 
     #Reverse_Ladder_ops
@@ -241,14 +241,13 @@ def mcx_log_gate(ncontrol, clean=False, trace_depth_and_size=False):
             qc.x(t)
             qc.ccx(x, y, t)
 
-    if not clean:
+    if not clean1:
         #Ladder_ops
         for (x, y, t) in ladder_ops[1:]:
                 qc.ccx(x, y, t)
                 qc.x(t)
 
         #Central linear MCX
-        linear_mcx = mcx_linear_gate(len(final_ctrls))
         qc.append(linear_mcx, final_ctrls + [anc2, target])
         #Reverse_Ladder_ops
         for (x, y, t) in reversed(ladder_ops[1:]):
@@ -259,7 +258,7 @@ def mcx_log_gate(ncontrol, clean=False, trace_depth_and_size=False):
     qc_reordered.compose(qc, qubits = [anc1] + controls + [anc2, target], inplace=True)
     gate = qc_reordered.to_gate()
 
-    if not clean : #Storing gates only if ancilla is dirty
+    if clean1 and not clean2: #Storing gates only if ancilla1 is clean and ancilla2 is dirty (what we use for exact_one)
         log_mcx_memory[ncontrol] = gate
         if trace_depth_and_size:
             qc_reordered = transpile(qc_reordered, basis_gates=['x','cx','ccx'])

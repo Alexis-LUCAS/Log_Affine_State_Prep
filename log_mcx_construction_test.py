@@ -69,7 +69,7 @@ def test_fuzz_random_cases(num_controls: int):
     num_samples = 1024
     num_qubits = num_controls + 3
     target_index = num_controls + 2
-    gate = mcx_log_gate(ncontrol=num_controls)
+    gate = mcx_log_gate(ncontrol=num_controls, clean1=False, clean2=False)
     circuit = QuantumCircuit(num_qubits)
     circuit.append(gate, list(range(num_qubits)))
     circuit = transpile(circuit, basis_gates=['x', 'cx', 'ccx'])
@@ -89,7 +89,7 @@ def test_low_weight_cases(num_controls: int, num_off_controls):
     target_index = num_controls + 2
     ancilla1_index = 0
     ancilla2_index = num_controls+1
-    gate = mcx_log_gate(ncontrol=num_controls)
+    gate = mcx_log_gate(ncontrol=num_controls, clean1=False, clean2=False)
     circuit = QuantumCircuit(num_qubits)
     circuit.append(gate, list(range(num_qubits)))
     circuit = transpile(circuit, basis_gates=['x', 'cx', 'ccx'])

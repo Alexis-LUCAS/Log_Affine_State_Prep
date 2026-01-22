@@ -53,7 +53,7 @@ def A_n(n):
 # PREPARE + EXACT-1
 def build_circuit_from_A(n):
     """Qubit order: [q0, q1, ..., q_{n-1}, anc, flag]"""
-    qc = QuantumCircuit(n + 2, name=f"PREPARE_{n}")
+    qc = QuantumCircuit(n + 3, name=f"PREPARE_{n}")
     qc.append(A_n(n), list(range(n)))
     qc.append(exact_one_gate(n), qc.qubits)
     return qc
@@ -76,7 +76,7 @@ def build_prepare_select_prepare_dag(n):
         qc.h(bi)
 
     prepare = build_circuit_from_A(n).to_gate(label=f"PREPARE_{n}")
-    qc.append(prepare, q + [anc[0], flag])
+    qc.append(prepare, q + [anc[0], anc[1], flag])
 
     # SELECT
     fan_out_gate = F1(n)
@@ -85,6 +85,6 @@ def build_prepare_select_prepare_dag(n):
         qc.ccz(anc[i], q[i], b[i])
     qc.append(fan_out_gate.inverse(),[flag]+anc)
 
-    qc.append(prepare.inverse(), q + [anc[0], flag])
+    qc.append(prepare.inverse(), q + [anc[0], anc[1], flag])
 
     return qc

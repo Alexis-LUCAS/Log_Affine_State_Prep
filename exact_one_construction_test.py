@@ -54,7 +54,7 @@ def compute_depth(circuit) -> int:
 
 @pytest.mark.parametrize('bit_string_size', [10, 100, 200, 500, 1000])
 def test_depth(bit_string_size: int):
-    num_qubits = bit_string_size + 2
+    num_qubits = bit_string_size + 3
     gate = exact_one_gate(bit_string_size)
     circuit = QuantumCircuit(num_qubits)
     circuit.append(gate, list(range(num_qubits)))
@@ -67,8 +67,8 @@ def test_depth(bit_string_size: int):
 @pytest.mark.parametrize('bit_string_size', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 32, 64, 100])
 def test_fuzz_random_cases(bit_string_size: int):
     num_samples = 1024
-    num_qubits = bit_string_size + 2
-    target_index = bit_string_size + 1
+    num_qubits = bit_string_size + 3
+    target_index = bit_string_size + 2
     gate = exact_one_gate(bit_string_size)
     circuit = QuantumCircuit(num_qubits)
     circuit.append(gate, list(range(num_qubits)))
@@ -80,15 +80,16 @@ def test_fuzz_random_cases(bit_string_size: int):
         dtype=np.uint64,
     )
     input_states[bit_string_size] = np.zeros_like(input_states[bit_string_size])
-    hamming_one = np.zeros_like(input_states[0])
+    input_states[bit_string_size+1] = np.zeros_like(input_states[bit_string_size+1])
+    exact_one = np.zeros_like(input_states[0])
     for i in range(bit_string_size):
         term = input_states[i]
         for j in range(bit_string_size):
             if j != i:
                 term &= ~input_states[j]
-        hamming_one |= term
+        exact_one |= term
     expected = np.copy(input_states)
-    expected[target_index] ^= hamming_one
+    expected[target_index] ^= exact_one
     actual = bulk_simulate_result_of_applying_classical_circuit_to(
         circuit, input_states
     )
@@ -98,9 +99,10 @@ def test_fuzz_random_cases(bit_string_size: int):
 @pytest.mark.parametrize('bit_string_size', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 32, 64, 100])
 @pytest.mark.parametrize('num_ones_qubits', [0, 1, 2])
 def test_exact_ones_cases(bit_string_size: int, num_ones_qubits: int):
-    num_qubits = bit_string_size + 2
-    target_index = bit_string_size + 1
-    ancilla_index = bit_string_size
+    num_qubits = bit_string_size + 3
+    target_index = bit_string_size + 2
+    ancilla_index_0 = bit_string_size
+    ancilla_index_1 = bit_string_size + 1
     gate = exact_one_gate(bit_string_size)
     circuit = QuantumCircuit(num_qubits)
     circuit.append(gate, list(range(num_qubits)))
@@ -112,17 +114,18 @@ def test_exact_ones_cases(bit_string_size: int, num_ones_qubits: int):
         for q in on_bits:
             input_states[q, shot_index] = True
         input_states[target_index, shot_index] = random.random() < 0.5
-        input_states[ancilla_index, shot_index] = False
+        input_states[ancilla_index_0, shot_index] = False
+        input_states[ancilla_index_1, shot_index] = False
     input_states_packed = np.packbits(input_states, axis=1)
-    hamming_one = np.zeros_like(input_states_packed[0])
+    exact_one = np.zeros_like(input_states_packed[0])
     for i in range(bit_string_size):
         term = input_states_packed[i]
         for j in range(bit_string_size):
             if j != i:
                 term &= ~input_states_packed[j]
-        hamming_one |= term
+        exact_one |= term
     expected = np.copy(input_states_packed)
-    expected[target_index] ^= hamming_one
+    expected[target_index] ^= exact_one
     actual = bulk_simulate_result_of_applying_classical_circuit_to(
         circuit, input_states_packed
     )
