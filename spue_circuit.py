@@ -52,7 +52,7 @@ def A_n(n):
 
 # PREPARE + EXACT-1
 def build_circuit_from_A(n):
-    """Qubit order: [q0, q1, ..., q_{n-1}, anc, flag]"""
+    """Qubit order: [q0, q1, ..., q_{n-1}, anc1, anc2, flag]"""
     qc = QuantumCircuit(n + 3, name=f"PREPARE_{n}")
     qc.append(A_n(n), list(range(n)))
     qc.append(exact_one_gate(n), qc.qubits)
@@ -64,6 +64,16 @@ def build_prepare_select_prepare_dag(n):
     Qubit layout (Qiskit bitstring, q0 on the right):
     [anc_(n-1) ... anc_0 | b_(n-1) ... b_0 | flag | q_(n-1) ... q_0 ]
     """
+    if n == 1: # 0 ancilla
+         qc = QuantumCircuit(3, name="PREPARE_SELECT_PREPAREdag")
+         qc.h(2)
+         qc.append(A_n(1), qargs = [0])
+         qc.cx(0,1)
+         qc.ccz(1,0,2)
+         qc.cx(0,1)
+         qc.append(A_n(1).inverse(), qargs = [0])
+         return qc
+    
     qc = QuantumCircuit(3*n + 1, name="PREPARE_SELECT_PREPAREdag")
 
     q    = list(range(n))

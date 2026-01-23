@@ -7,11 +7,12 @@ Authors : Tanuj Khattar and Craig Gidney
 from qiskit import QuantumCircuit
 from qiskit.compiler import transpile
 
+# Linear MCX gate stored if dirty ancilla  
 linear_mcx_memory = {}
 linear_mcx_depth = {}
 linear_mcx_size = {}
 
-
+# Log MCX gate stored if first ancilla clean and second ancilla dirty 
 log_mcx_memory = {}
 log_mcx_depth = {}
 log_mcx_size = {}
