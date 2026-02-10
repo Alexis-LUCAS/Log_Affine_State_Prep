@@ -227,8 +227,8 @@ def mcx_log_gate(ncontrol, clean1=True, clean2 =False, trace_depth_and_size=Fals
         if t[0] == 0:
             qc.ccx(x, y, t)
         else:
-            qc.ccx(x, y, t)
             qc.x(t)
+            qc.ccx(x, y, t)    
 
     #Central linear MCX
     linear_mcx = mcx_linear_gate(len(final_ctrls), clean=clean2)
@@ -239,21 +239,21 @@ def mcx_log_gate(ncontrol, clean1=True, clean2 =False, trace_depth_and_size=Fals
         if t[0] == 0:
             qc.ccx(x, y, t)
         else:
-            qc.x(t)
             qc.ccx(x, y, t)
+            qc.x(t)
 
     if not clean1:
         #Ladder_ops
         for (x, y, t) in ladder_ops[1:]:
-                qc.ccx(x, y, t)
                 qc.x(t)
+                qc.ccx(x, y, t)
 
         #Central linear MCX
         qc.append(linear_mcx, final_ctrls + [anc2, target])
         #Reverse_Ladder_ops
         for (x, y, t) in reversed(ladder_ops[1:]):
-                qc.x(t)
                 qc.ccx(x, y, t)
+                qc.x(t)
         
     qc_reordered = QuantumCircuit(nqubits)
     qc_reordered.compose(qc, qubits = [anc1] + controls + [anc2, target], inplace=True)

@@ -1,3 +1,7 @@
+"""
+The code below is based on construction test from https://github.com/BaptisteClaudon/Polylog_MCX-public.
+"""
+
 import collections
 import itertools
 import random
