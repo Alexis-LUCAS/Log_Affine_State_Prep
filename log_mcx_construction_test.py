@@ -56,6 +56,9 @@ def compute_depth(circuit) -> int:
             raise NotImplementedError(f'{instruction=}')
     return max(qubit_depth.values())
 
+
+### We test the MCX gate with first ancilla clean (zeroed) and second ancilla dirty, what we use in the exact-one oracle.
+
 @pytest.mark.parametrize('num_controls', [10, 100, 200, 500, 1000])
 def test_depth(num_controls: int):
     num_qubits = num_controls + 3
@@ -65,23 +68,26 @@ def test_depth(num_controls: int):
     circuit = transpile(circuit, basis_gates=['x', 'cx', 'ccx'])
     depth = compute_depth(circuit)
     lg_n = num_controls.bit_length()
-    expected = 67 * lg_n # Heuristic upper bound
+    expected = 10 * lg_n # Based on fitted polynomial
     assert depth <= expected
 
 @pytest.mark.parametrize('num_controls', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 32, 64, 100])
 def test_fuzz_random_cases(num_controls: int):
     num_samples = 1024
     num_qubits = num_controls + 3
+    ancilla1_index = num_controls
     target_index = num_controls + 2
-    gate = mcx_log_gate(ncontrol=num_controls, clean1=False, clean2=False)
+    gate = mcx_log_gate(ncontrol=num_controls)
     circuit = QuantumCircuit(num_qubits)
     circuit.append(gate, list(range(num_qubits)))
     circuit = transpile(circuit, basis_gates=['x', 'cx', 'ccx'])
     input_states = np.random.randint(low=0, high=(1 << 64) - 1, size=(num_qubits, num_samples // 64), dtype=np.uint64,)
+    input_states[ancilla1_index] = False
     controls_satisfied = ~np.zeros_like(input_states[0])
     for k in range(num_controls):
         controls_satisfied &= input_states[k]
     expected = np.copy(input_states)
+    expected[ancilla1_index] = False
     expected[target_index] ^= controls_satisfied
     actual = bulk_simulate_result_of_applying_classical_circuit_to(circuit, input_states)
     assert np.array_equal(actual, expected)
@@ -91,9 +97,9 @@ def test_fuzz_random_cases(num_controls: int):
 def test_low_weight_cases(num_controls: int, num_off_controls):
     num_qubits = num_controls + 3
     target_index = num_controls + 2
-    ancilla1_index = 0
+    ancilla1_index = num_controls
     ancilla2_index = num_controls+1
-    gate = mcx_log_gate(ncontrol=num_controls, clean1=False, clean2=False)
+    gate = mcx_log_gate(ncontrol=num_controls)
     circuit = QuantumCircuit(num_qubits)
     circuit.append(gate, list(range(num_qubits)))
     circuit = transpile(circuit, basis_gates=['x', 'cx', 'ccx'])
@@ -103,7 +109,7 @@ def test_low_weight_cases(num_controls: int, num_off_controls):
     for shot_index, on_bits in enumerate(cases):
         for q in on_bits:
             input_states[q, shot_index] = False
-        input_states[ancilla1_index, shot_index] = random.random() < 0.5
+        input_states[ancilla1_index, shot_index] = False
         input_states[ancilla2_index, shot_index] = random.random() < 0.5
         input_states[target_index, shot_index] = random.random() < 0.5
     input_states = np.packbits(input_states, axis=1)

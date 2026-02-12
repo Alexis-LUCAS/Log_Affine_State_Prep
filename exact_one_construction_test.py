@@ -65,7 +65,7 @@ def test_depth(bit_string_size: int):
     circuit = transpile(circuit, basis_gates=['x', 'cx', 'ccx'])
     depth = compute_depth(circuit)
     lg_n = bit_string_size.bit_length()
-    expected = 634 * lg_n # Heuristic upper bound
+    expected = 81 * lg_n - 100 # Based on fitted polynomial
     assert depth <= expected
 
 @pytest.mark.parametrize('bit_string_size', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 32, 64, 100])
