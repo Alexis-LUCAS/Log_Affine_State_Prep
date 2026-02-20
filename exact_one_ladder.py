@@ -17,12 +17,8 @@ exact_one_ladder_size[n] = qc.size()
 def exact_one_ladder_power_2(n):
     qc = QuantumCircuit(3*n-2)
     if n == 2:
-        qc.x(1)
-        qc.ccx(0,1,2)
-        qc.x(1)
-        qc.x(0)
-        qc.ccx(0,1,2)
-        qc.x(0)
+        qc.cx(0,2)
+        qc.cx(1,2)
         qc.ccx(0,1,3)
         return qc
     else:
