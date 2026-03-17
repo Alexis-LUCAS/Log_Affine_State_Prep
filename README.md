@@ -10,3 +10,5 @@ In particular, it contains:
 * a python file to prepare the operator $1 - 2 p_n L_n$ , entitled spue_circuit.py,
 * a Notebook simulating the state preparation of  $(1 - 2 p_n L_n)H^{\otimes n} \ket 0^{\otimes n} = \frac{1}{\sqrt{2^{n}}} \sum\limits_{x \in B_n}{\left( 1-\frac{2 p_n x}{1- \frac{1}{2^n}}\right) \ket x}$  , entitled spue_simulation.ipynb,
 * a Notebook giving depth and size plots of the MCX gate with first ancilla zeroed and second dirty, the Exact-one oracle and the block-encoding circuit of $1 - 2 p_n L_n$ , entitled depth_size_plots.ipynb.
+
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11486580.svg)](https://doi.org/10.5281/zenodo.11486580)
