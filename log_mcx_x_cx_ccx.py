@@ -1,6 +1,7 @@
 """
 The following code implementing multi-control-X gates (MCX) with logarithmic depth is based on paper : 
 Rise of conditionally clean ancillae for efficient quantum circuit constructions (https://quantum-journal.org/papers/q-2025-05-21-1752/pdf/)
+and associated code repository (https://doi.org/10.5281/zenodo.12819218).
 Authors : Tanuj Khattar and Craig Gidney
 """
 
