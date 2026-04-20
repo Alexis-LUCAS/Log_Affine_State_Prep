@@ -1,7 +1,7 @@
 # Log_Affine_State_Prep
 
 
-This repository contains the code used in the paper "Logarithmic-depth quantum state preparation of polynomials" (Lien Arxiv) to prepare the operator $1-2p_n L_n$.
+This repository contains the code used in the paper "Logarithmic-depth quantum state preparation of polynomials" (https://arxiv.org/abs/2603.16527) to prepare the operator $1-2p_n L_n$.
 
 In particular, it contains:
 
